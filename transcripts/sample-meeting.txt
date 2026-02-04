@@ -1,0 +1,38 @@
+2025-01-15 14:00:00 - Zoom Meeting with Portugal Team
+
+Participants:
+- Jeff Kern (Teach For All)
+- Maria Silva (Portugal CEO)
+- João Santos (Program Director)
+
+Meeting Notes:
+Jeff: Welcome everyone. Let's discuss the progress on the teacher recruitment initiative.
+
+Maria: We've made significant progress. We've recruited 15 new teachers this quarter, exceeding our target by 3.
+
+João: The onboarding process has been smooth. We've implemented the new training modules you recommended last month.
+
+Jeff: That's excellent news. How are the new teachers performing?
+
+Maria: Very well actually. The retention rate is at 92%, which is above our historical average of 85%.
+
+João: We've also received positive feedback from the schools. They appreciate the additional support we're providing.
+
+Jeff: Great work. Let's discuss the challenges you're facing with the curriculum implementation.
+
+Maria: The main challenge is adapting the curriculum to rural areas. We need more resources for remote communities.
+
+João: We're working on a digital solution that could help reach those remote areas.
+
+Jeff: That sounds promising. Keep me updated on the progress. Also, let me know if you need any support from the global network.
+
+Maria: Will do. Thank you for your continued support.
+
+João: Yes, thank you Jeff. Your guidance has been invaluable.
+
+Meeting ended at 15:30.
+
+Action Items:
+1. Develop digital curriculum for rural areas (João)
+2. Send quarterly progress report by end of month (Maria)
+3. Schedule follow-up call in 2 weeks (Jeff)

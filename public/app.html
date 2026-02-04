@@ -1,0 +1,1457 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teach For All Insights</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+  :root {
+    --bg: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-input: #f1f5f9;
+    --text: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --primary-light: #eef2ff;
+    --success: #10b981;
+    --success-light: #ecfdf5;
+    --danger: #ef4444;
+    --border: #e2e8f0;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+    --radius: 12px;
+    --radius-lg: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { 
+    background: var(--bg);
+    color: var(--text); 
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    line-height: 1.6;
+  }
+
+  /* Layout */
+  .app { display: flex; min-height: 100vh; }
+  
+  .sidebar {
+    width: 280px;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border);
+    padding: 24px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .main {
+    flex: 1;
+    margin-left: 280px;
+    padding: 32px 48px;
+    max-width: 1100px;
+    margin-left: calc(280px + ((100vw - 280px - 1100px) / 2));
+  }
+
+  @media (max-width: 1400px) {
+    .main {
+      margin-left: 280px;
+      margin-right: 32px;
+      max-width: calc(100vw - 280px - 64px);
+    }
+  }
+
+  /* Sidebar */
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--primary), #8b5cf6);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+  }
+
+  .logo-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .nav-section {
+    margin-bottom: 24px;
+  }
+
+  .nav-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    padding-left: 12px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+    color: var(--text-secondary);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 0.95rem;
+  }
+
+  .nav-item:hover {
+    background: var(--bg-input);
+    color: var(--text);
+  }
+
+  .nav-item.active {
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+
+  .nav-item-icon {
+    width: 20px;
+    text-align: center;
+  }
+
+  /* Status */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: var(--success-light);
+    color: var(--success);
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--success);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* Cards */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-title-icon {
+    font-size: 1.2rem;
+  }
+
+  /* Forms */
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-input);
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--text);
+    transition: all 0.15s;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    background: white;
+  }
+
+  textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--text);
+  }
+
+  .btn:hover {
+    background: var(--bg-input);
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-hover);
+  }
+
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* Quick filters */
+  .quick-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .filter-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-secondary);
+  }
+
+  .filter-chip:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  /* Chat */
+  .chat-container {
+    max-height: 500px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+  }
+
+  .chat-empty {
+    text-align: center;
+    padding: 48px;
+    color: var(--text-muted);
+  }
+
+  .chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .copy-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    opacity: 0.5;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover {
+    opacity: 1;
+    background: var(--bg-hover);
+  }
+
+  .chat-empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+
+  .chat-message {
+    padding: 16px;
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    animation: slideIn 0.2s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .chat-message.user {
+    background: var(--primary-light);
+    margin-left: 40px;
+  }
+
+  .chat-message.assistant {
+    background: var(--bg-input);
+    margin-right: 40px;
+  }
+
+  .chat-role {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
+  .chat-message.user .chat-role { color: var(--primary); }
+  .chat-message.assistant .chat-role { color: var(--success); }
+
+  .chat-content h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 16px 0 8px;
+  }
+
+  .chat-content h4:first-child { margin-top: 0; }
+
+  .chat-content ul, .chat-content ol {
+    margin: 8px 0 8px 20px;
+  }
+
+  .chat-content li {
+    margin: 6px 0;
+    color: var(--text-secondary);
+  }
+
+  .chat-content strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .chat-content p {
+    margin: 8px 0;
+    color: var(--text-secondary);
+  }
+
+  /* Input area */
+  .chat-input-area {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+  }
+
+  .chat-input-area textarea {
+    flex: 1;
+    min-height: 44px;
+    max-height: 120px;
+  }
+
+  /* Loading */
+  .loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: var(--primary-light);
+    border-radius: var(--radius);
+    color: var(--primary);
+    font-weight: 500;
+  }
+
+  .loading[hidden] { display: none; }
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(99, 102, 241, 0.2);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Error */
+  .error-msg {
+    padding: 12px 16px;
+    background: var(--danger-light);
+    color: var(--danger);
+    border-radius: var(--radius);
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+
+  .error-msg:empty { display: none; }
+
+  /* Sources */
+  .sources-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .source-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--bg-input);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+
+  a.source-link {
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+
+  a.source-link:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  a.citation-link {
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px dashed rgba(99, 102, 241, 0.6);
+  }
+
+  a.citation-link:hover {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+
+  /* Tab content */
+  .tab-view { display: none; }
+  .tab-view.active { display: block; }
+
+  /* Report card */
+  .report-card {
+    background: var(--bg-input);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .report-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .report-date {
+    padding: 4px 10px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .report-title {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* Toast */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+  }
+
+  .toast {
+    padding: 14px 20px;
+    background: var(--text);
+    color: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn 0.3s ease;
+    margin-top: 8px;
+  }
+
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 20px; }
+  }
+
+  /* Collapsible */
+  details summary {
+    cursor: pointer;
+    padding: 12px 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+
+  details summary:hover { color: var(--text-secondary); }
+
+  #debug {
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 0.75rem;
+    background: var(--bg-input);
+    padding: 16px;
+    border-radius: var(--radius);
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 200px;
+    overflow: auto;
+    color: var(--text-muted);
+  }
+
+  .muted { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <span class="logo-text">Teach For All Insights</span>
+      </div>
+
+      <nav class="nav-section">
+        <div class="nav-label">Main</div>
+        <button class="nav-item active" onclick="switchTab('ask')">
+          <span class="nav-item-icon">💬</span> Ask AI
+        </button>
+        <button class="nav-item" onclick="switchTab('reports')">
+          <span class="nav-item-icon">📊</span> Reports
+        </button>
+        <button class="nav-item" onclick="switchTab('transcripts')">
+          <span class="nav-item-icon">📝</span> Transcripts
+        </button>
+        <button class="nav-item" onclick="switchTab('notes')">
+          <span class="nav-item-icon">✏️</span> Add Note
+        </button>
+      </nav>
+
+      <div style="margin-top: auto; padding-top: 24px; border-top: 1px solid var(--border);">
+        <div class="status-badge">
+          <span class="status-dot"></span>
+          Connected
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <!-- ASK AI TAB -->
+      <div id="view-ask" class="tab-view active">
+        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px;">Ask AI</h2>
+
+        <!-- Filters -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-title-icon">🔍</span> Filters
+            </div>
+            <div class="quick-filters">
+              <button class="filter-chip" onclick="qrange(7)">7 days</button>
+              <button class="filter-chip" onclick="qrange(30)">30 days</button>
+              <button class="filter-chip" onclick="qrange(90)">90 days</button>
+              <button class="filter-chip" onclick="clearDates()">Clear</button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>From</label>
+              <input type="date" id="from" />
+            </div>
+            <div class="form-group">
+              <label>To</label>
+              <input type="date" id="to" />
+            </div>
+            <div class="form-group">
+              <label>Type</label>
+              <select id="type">
+                <option value="all">All types</option>
+                <option value="Zoom Meeting">Meetings</option>
+                <option value="Email">Emails</option>
+                <option value="Note">Notes</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Countries</label>
+              <input type="text" id="countries" placeholder="Portugal, Spain..." />
+            </div>
+            <div class="form-group">
+              <label>Topic</label>
+              <input type="text" id="topic" placeholder="budget, onboarding..." />
+            </div>
+            <div class="form-group">
+              <label>Depth</label>
+              <select id="speed">
+                <option value="30">Fast (30)</option>
+                <option value="100" selected>Balanced (100)</option>
+                <option value="300">Deep (300)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conversation -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-title-icon">💬</span> Conversation
+              <span id="convStatus" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 400;"></span>
+            </div>
+            <button class="btn btn-sm" onclick="newConversation()">🔄 New Chat</button>
+          </div>
+
+          <div id="conversationHistory" class="chat-container"></div>
+
+          <div id="busy" class="loading" hidden>
+            <span class="spinner"></span>
+            <span id="busyText">Thinking...</span>
+          </div>
+
+          <div id="err" class="error-msg"></div>
+
+          <div class="chat-input-area">
+            <textarea id="question" placeholder="Ask a question..." rows="1"></textarea>
+            <select id="style" style="width: auto;">
+              <option value="normal">Detailed</option>
+              <option value="short">Brief</option>
+            </select>
+            <button class="btn btn-primary" id="askBtn" onclick="ask()">Send</button>
+          </div>
+        </div>
+
+        <!-- Sources -->
+        <div class="card" id="sourcesCard" style="display: none;">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-title-icon">📚</span> Sources
+            </div>
+          </div>
+          <div id="sources" class="sources-list"></div>
+          <details style="margin-top: 16px;">
+            <summary>Debug info</summary>
+            <div id="debug"></div>
+          </details>
+        </div>
+      </div>
+
+      <!-- REPORTS TAB -->
+      <div id="view-reports" class="tab-view">
+        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px;">Weekly Reports</h2>
+        
+        <div class="card">
+          <div class="form-row">
+            <div class="form-group">
+              <label>From</label>
+              <input type="date" id="rep_from" />
+            </div>
+            <div class="form-group">
+              <label>To</label>
+              <input type="date" id="rep_to" />
+            </div>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-primary" id="repBtn" onclick="getPartnerReports()">📥 Load Reports</button>
+            <button class="btn" onclick="setRepDates(7)">Past 7 days</button>
+            <button class="btn" onclick="setRepDates(30)">Past 30 days</button>
+          </div>
+        </div>
+
+        <div id="rep_container"></div>
+        <div id="rep_err" class="error-msg"></div>
+      </div>
+
+      <!-- TRANSCRIPTS TAB -->
+      <div id="view-transcripts" class="tab-view">
+        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px;">Transcripts</h2>
+        
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-title-icon">🔍</span> Search Transcripts
+            </div>
+            <div class="quick-filters">
+              <button class="filter-chip" onclick="trRange(7)">7 days</button>
+              <button class="filter-chip" onclick="trRange(30)">30 days</button>
+              <button class="filter-chip" onclick="trRange(90)">3 months</button>
+              <button class="filter-chip" onclick="trClearDates()">Clear</button>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>From</label>
+              <input type="date" id="tr_from" />
+            </div>
+            <div class="form-group">
+              <label>To</label>
+              <input type="date" id="tr_to" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Keywords</label>
+            <input type="text" id="tr_kw" placeholder="Search by filename or content..." />
+          </div>
+          <button class="btn btn-primary" id="trFindBtn" onclick="findTranscripts()">🔎 Find Transcripts</button>
+        </div>
+
+        <div id="tr_results"></div>
+
+        <div class="card" id="tr_qa" style="display: none;">
+          <div class="card-title" style="margin-bottom: 16px;">
+            <span class="card-title-icon">💬</span> Ask About Transcript
+          </div>
+          <div id="tr_meta" class="muted" style="margin-bottom: 12px;"></div>
+          <pre id="tr_preview" style="background: var(--bg-input); padding: 16px; border-radius: var(--radius); max-height: 200px; overflow: auto; font-size: 0.8rem; white-space: pre-wrap;"></pre>
+          
+          <div style="margin-top: 16px; margin-bottom: 12px;">
+            <label style="margin-bottom: 8px; display: block;">Quick Prompts</label>
+            <div class="quick-filters">
+              <button class="filter-chip" onclick="setTrPrompt('Summarize this meeting: main topics discussed, key decisions, and action items')">📝 Summary</button>
+              <button class="filter-chip" onclick="setTrPrompt('List all action items and follow-ups mentioned, with who is responsible')">✅ Action Items</button>
+              <button class="filter-chip" onclick="setTrPrompt('What were the key decisions made in this meeting?')">🎯 Decisions</button>
+              <button class="filter-chip" onclick="setTrPrompt('Who attended and what were each persons main contributions?')">👥 Participants</button>
+              <button class="filter-chip" onclick="setTrPrompt('What questions or concerns were raised that need follow-up?')">❓ Open Questions</button>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <textarea id="tr_q" placeholder="Ask about this transcript..."></textarea>
+          </div>
+          <button class="btn btn-primary" id="trAskBtn" onclick="askTranscript()">✨ Ask</button>
+          
+          <div id="tr_thinking" style="margin-top: 16px; display: none; padding: 24px; text-align: center; color: var(--text-muted);">
+            <div style="font-size: 24px; margin-bottom: 8px;">🤔</div>
+            <div>Analyzing transcript...</div>
+          </div>
+          
+          <div id="tr_ans_container" style="margin-top: 16px; display: none;">
+            <div class="chat-message assistant">
+              <div class="chat-header">
+                <span class="chat-role">AI Assistant</span>
+                <button class="copy-btn" onclick="copyTrResponse()" title="Copy to clipboard">📋</button>
+              </div>
+              <div class="chat-content" id="tr_ans"></div>
+            </div>
+          </div>
+          <div id="tr_err" class="error-msg"></div>
+        </div>
+      </div>
+
+      <!-- NOTES TAB -->
+      <div id="view-notes" class="tab-view">
+        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px;">Add Note</h2>
+        
+        <div class="card">
+          <div class="form-group">
+            <label>Note content</label>
+            <textarea id="note" placeholder="Write your note here..." rows="5"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Headline (optional)</label>
+              <input type="text" id="note_headline" placeholder="Brief title..." />
+            </div>
+            <div class="form-group">
+              <label>Countries (optional)</label>
+              <input type="text" id="note_countries" placeholder="Portugal, Spain..." />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Meeting ID (optional)</label>
+              <input type="text" id="meeting_id" placeholder="e.g., r1" />
+            </div>
+            <div class="form-group">
+              <label>Author (optional)</label>
+              <input type="text" id="author" placeholder="Your name" />
+            </div>
+          </div>
+          <button class="btn btn-primary" id="saveNoteBtn" onclick="saveNote()">💾 Save Note</button>
+          <div id="noteMsg" style="margin-top: 16px;"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    const API_BASE = "/api";
+    const SESSION_ID = 'session_' + Date.now();
+    let conversationMessages = [];
+
+    // Toast
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    // Tabs
+    function switchTab(name) {
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
+      document.getElementById('view-' + name).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      document.querySelector(`button[onclick="switchTab('${name}')"]`)?.classList.add('active');
+    }
+
+    // API
+    async function apiCall(params, timeoutMs = 60000) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const qs = new URLSearchParams(params);
+        const response = await fetch(API_BASE + '?' + qs.toString(), {
+          signal: controller.signal
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    // Helpers
+    function todayIso() { return new Date().toISOString().slice(0,10); }
+    function daysAgoIso(n) { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0,10); }
+    function escapeHtml(x) { return (x||"").replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+    function qrange(n) { document.getElementById("from").value = daysAgoIso(n); document.getElementById("to").value = todayIso(); }
+    function clearDates() { document.getElementById("from").value = ""; document.getElementById("to").value = ""; }
+    function trRange(n) { document.getElementById("tr_from").value = daysAgoIso(n); document.getElementById("tr_to").value = todayIso(); }
+    function trClearDates() { document.getElementById("tr_from").value = ""; document.getElementById("tr_to").value = ""; }
+
+    // Copy response
+    function copyResponse(idx) {
+      const msg = conversationMessages[idx];
+      if (!msg) return;
+      const el = document.getElementById('msg-' + idx);
+      const text = el ? el.innerText : msg.text;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied to clipboard');
+      }).catch(() => {
+        showToast('Failed to copy', 'error');
+      });
+    }
+
+    function linkifyCitations(html) {
+      const srcs = window.CURRENT_SOURCES || [];
+      if (!srcs.length) return html;
+      let out = String(html || '');
+
+      // First linkify already-bold citations.
+      out = out.replace(/<strong>\[(\d+)\]<\/strong>/g, (m, n) => {
+        const i = Number(n);
+        if (!Number.isFinite(i) || i < 1 || i > srcs.length) return m;
+        return `<a href="#" class="citation-link" onclick="openSourceByIndex(${i - 1}); return false;" title="Open source"><strong>[${i}]</strong></a>`;
+      });
+
+      // Then linkify plain [n] citations (common if the model forgets to bold).
+      // Avoid double-linkifying by skipping anything that is already inside an anchor.
+      out = out.replace(/\[(\d+)\]/g, (m, n, offset) => {
+        const i = Number(n);
+        if (!Number.isFinite(i) || i < 1 || i > srcs.length) return m;
+        const before = out.slice(Math.max(0, offset - 12), offset);
+        if (before.includes('href=') || before.includes('citation-link')) return m;
+        return `<a href="#" class="citation-link" onclick="openSourceByIndex(${i - 1}); return false;" title="Open source"><strong>[${i}]</strong></a>`;
+      });
+      return out;
+    }
+
+    // Conversation
+    function updateConversationUI() {
+      const container = document.getElementById('conversationHistory');
+      const status = document.getElementById('convStatus');
+      const sourcesCard = document.getElementById('sourcesCard');
+      
+      if (conversationMessages.length === 0) {
+        container.innerHTML = `<div class="chat-empty"><div class="chat-empty-icon">💬</div><p>Start a conversation by asking a question</p></div>`;
+        status.textContent = '';
+        sourcesCard.style.display = 'none';
+        return;
+      }
+      
+      status.textContent = `(${conversationMessages.length} messages)`;
+      container.innerHTML = conversationMessages.map((msg, idx) => `
+        <div class="chat-message ${msg.role}">
+          <div class="chat-header">
+            <span class="chat-role">${msg.role === 'user' ? 'You' : 'AI Assistant'}</span>
+            ${msg.role === 'assistant' ? `<button class="copy-btn" onclick="copyResponse(${idx})" title="Copy to clipboard">📋</button>` : ''}
+          </div>
+          <div class="chat-content" id="msg-${idx}">${msg.role === 'user' ? escapeHtml(msg.text) : linkifyCitations(msg.text)}</div>
+        </div>
+      `).join('');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    async function newConversation() {
+      try { await apiCall({ action: 'clearConversation', sessionId: SESSION_ID }); } catch (e) {}
+      conversationMessages = [];
+      updateConversationUI();
+      document.getElementById('question').value = '';
+      document.getElementById('err').textContent = '';
+      document.getElementById('sourcesCard').style.display = 'none';
+      showToast('New conversation started');
+    }
+
+    function collectFilters() {
+      return {
+        from: document.getElementById("from").value || "",
+        to: document.getElementById("to").value || "",
+        type: document.getElementById("type").value || "all",
+        countries: document.getElementById("countries").value || "",
+        topic: document.getElementById("topic").value || "",
+        limit: document.getElementById("speed").value || "100",
+        style: document.getElementById("style").value || "normal",
+        question: document.getElementById("question").value || ""
+      };
+    }
+
+    async function ask() {
+      const btn = document.getElementById("askBtn");
+      const busy = document.getElementById("busy");
+      const errEl = document.getElementById("err");
+      const p = collectFilters();
+      
+      if (!p.question.trim()) { errEl.textContent = "Please enter a question."; return; }
+
+      btn.disabled = true;
+      errEl.textContent = '';
+      document.getElementById('busyText').textContent = 'Thinking...';
+      busy.hidden = false;
+      
+      conversationMessages.push({ role: 'user', text: p.question });
+      updateConversationUI();
+      document.getElementById('question').value = '';
+
+      try {
+        const data = await apiCall({ action: "ask", sessionId: SESSION_ID, ...p }, 90000);
+        if (!data || data.ok === false) {
+          errEl.textContent = "Error: " + (data?.error || "Unknown");
+          conversationMessages.pop();
+          updateConversationUI();
+        } else {
+          conversationMessages.push({ role: 'assistant', text: data.answer || '' });
+          updateConversationUI();
+          setSources(data.sources || []);
+          setDebug(data);
+        }
+      } catch (err) {
+        errEl.textContent = "Error: " + err.message;
+        conversationMessages.pop();
+        updateConversationUI();
+      } finally {
+        busy.hidden = true;
+        btn.disabled = false;
+        document.getElementById('question').focus();
+      }
+    }
+
+    function setSources(srcs) {
+      const el = document.getElementById("sources");
+      const card = document.getElementById("sourcesCard");
+      if (!srcs?.length) { card.style.display = 'none'; return; }
+      card.style.display = 'block';
+      window.CURRENT_SOURCES = srcs;
+      el.innerHTML = srcs.map((s, idx) => {
+        const bits = [s.date, s.type, s.countries].filter(Boolean).join(" · ");
+        const link = getSourceLink(s, idx);
+        if (link) {
+          return `<a href="${link.external ? link.url : '#'}" onclick="openSourceByIndex(${idx}); return false;" class="source-tag source-link" title="${link.tooltip}">${link.icon} ${bits} — ${escapeHtml(s.title||"")}</a>`;
+        }
+        return `<span class="source-tag">${bits} — ${escapeHtml(s.title||"")}</span>`;
+      }).join("");
+
+      updateConversationUI();
+    }
+
+    function normType(t) { return String(t || '').toLowerCase().trim(); }
+    function looksLikeEmailTitle(title) {
+      const s = String(title || '').trim().toLowerCase();
+      if (!s) return false;
+      return s.startsWith('re:') || s.startsWith('fw:') || s.startsWith('fwd:') || s.includes('email');
+    }
+    function looksLikeTranscriptTitle(title) {
+      const s = String(title || '').trim().toLowerCase();
+      if (!s) return false;
+      return s.includes('zoom') || s.includes('transcript') || s.endsWith('.txt');
+    }
+    function isEmailType(t, title, source) {
+      if (source?.message_id) return true;
+      return t.includes('email') || t.includes('mail') || looksLikeEmailTitle(title);
+    }
+    function isTranscriptType(t, title, source) {
+      if (source?.file_path) return true;
+      return t.includes('zoom') || t.includes('transcript') || t.includes('meeting') || looksLikeTranscriptTitle(title);
+    }
+
+    function getSourceLink(source, idx) {
+      const type = normType(source.type);
+      const title = String(source.title || "").trim();
+
+      if (isEmailType(type, title, source)) {
+        if (source.message_id) {
+          return {
+            url: `https://outlook.office.com/mail/deeplink/read/${encodeURIComponent(source.message_id)}`,
+            icon: '📧',
+            tooltip: 'Open in Outlook',
+            external: true
+          };
+        }
+
+        const q = title ? `\"${title}\"` : "";
+        return {
+          url: `https://outlook.office.com/mail/search?q=${encodeURIComponent(q)}`,
+          icon: '📧',
+          tooltip: title ? 'Search this subject in Outlook' : 'Open Outlook search',
+          external: true
+        };
+      }
+
+      if (isTranscriptType(type, title, source)) {
+        if (source.file_path) {
+          return {
+            url: '#',
+            icon: '🎥',
+            tooltip: 'Open transcript',
+            external: false
+          };
+        }
+
+        if (title) {
+          return {
+            url: '#',
+            icon: '🎥',
+            tooltip: 'Find transcript by title',
+            external: false
+          };
+        }
+      }
+
+      if (source.source_url) {
+        return {
+          url: source.source_url,
+          icon: '🔗',
+          tooltip: 'Open source',
+          external: true
+        };
+      }
+
+      return null;
+    }
+
+    function openSourceByIndex(idx) {
+      const srcs = window.CURRENT_SOURCES || [];
+      const s = srcs[idx];
+      if (!s) {
+        showToast('Source not available', 'error');
+        return;
+      }
+      openSource(s);
+    }
+
+    function openSource(source) {
+      const type = normType(source.type);
+      const title = String(source.title || '').trim();
+
+      if (isEmailType(type, title, source)) {
+        if (source.message_id) {
+          window.open(`https://outlook.office.com/mail/deeplink/read/${encodeURIComponent(source.message_id)}`, '_blank');
+          return;
+        }
+        const q = title ? `\"${title}\"` : '';
+        window.open(`https://outlook.office.com/mail/search?q=${encodeURIComponent(q)}`, '_blank');
+        return;
+      }
+
+      if (isTranscriptType(type, title, source)) {
+        if (source.file_path) {
+          openTranscript(encodeURIComponent(source.file_path), encodeURIComponent(title));
+          return;
+        }
+        if (title) {
+          openTranscriptByTitle(encodeURIComponent(title));
+          return;
+        }
+      }
+
+      if (source.source_url) {
+        window.open(source.source_url, '_blank');
+        return;
+      }
+
+      showToast('No link available for this source', 'error');
+    }
+
+    function openTranscript(encPath, encName) {
+      const filePath = decodeURIComponent(encPath);
+      const fileName = decodeURIComponent(encName);
+      
+      switchTab('transcripts');
+      
+      setTimeout(() => {
+        TR_SELECTED = {
+          id: filePath,
+          name: fileName,
+          mimeType: 'text/plain',
+          preview: ''
+        };
+        document.getElementById('tr_meta').innerHTML = `<strong>${escapeHtml(fileName)}</strong>`;
+        document.getElementById('tr_preview').textContent = '(Loading from source...)';
+        document.getElementById('tr_qa').style.display = 'block';
+        document.getElementById('tr_ans_container').style.display = 'none';
+        document.getElementById('tr_qa').scrollIntoView({ behavior: 'smooth' });
+        showToast('Transcript loaded - ask a question below');
+      }, 100);
+    }
+
+    function openTranscriptByTitle(encTitle) {
+      const title = decodeURIComponent(encTitle);
+      switchTab('transcripts');
+      setTimeout(() => {
+        TR_AUTO_SELECT_QUERY = title;
+        document.getElementById('tr_kw').value = title;
+        findTranscripts();
+        showToast('Searching transcripts...');
+      }, 100);
+    }
+
+    function setDebug(data) {
+      document.getElementById("debug").textContent = [
+        "Conversation: " + (data.conversationLength || 1) + " messages",
+        "New context: " + (data.isNewConversation ? "Yes" : "No"),
+        "",
+        "REST URL: " + (data.debug?.rest || ""),
+        "",
+        "Prompt: " + (data.debug?.prompt || "").slice(0, 500) + "..."
+      ].join("\n");
+    }
+
+    // Reports
+    function setRepDates(n) {
+      document.getElementById("rep_from").value = daysAgoIso(n);
+      document.getElementById("rep_to").value = todayIso();
+    }
+
+    async function getPartnerReports() {
+      const btn = document.getElementById('repBtn');
+      const container = document.getElementById('rep_container');
+      const err = document.getElementById('rep_err');
+      const busy = document.getElementById('busy');
+
+      container.innerHTML = "";
+      err.textContent = "";
+      btn.disabled = true;
+      if(busy) { busy.hidden = false; document.getElementById('busyText').textContent = "Loading reports..."; }
+
+      try {
+        const data = await apiCall({
+          action: 'getReports',
+          from: document.getElementById('rep_from').value,
+          to: document.getElementById('rep_to').value
+        });
+
+        if (!data?.ok) {
+          err.textContent = data?.error || "Failed to load reports.";
+        } else if (!data.reports?.length) {
+          container.innerHTML = "<div class='chat-empty'><div class='chat-empty-icon'>📭</div><p>No reports found</p></div>";
+        } else {
+          container.innerHTML = data.reports.map(item => {
+            let raw = (item.summary_text || "").replace(/```html/gi, "").replace(/```/g, "").trim();
+            return `<div class="report-card">
+              <div class="report-header">
+                <span class="report-date">${escapeHtml(item.date_iso)}</span>
+                <span class="report-title">${escapeHtml(item.title)}</span>
+              </div>
+              <div class="chat-content">${raw || "(No content)"}</div>
+            </div>`;
+          }).join("");
+        }
+      } catch (e) {
+        err.textContent = "Error: " + e.message;
+      } finally {
+        btn.disabled = false;
+        if(busy) busy.hidden = true;
+      }
+    }
+
+    // Transcripts
+    let TR_SELECTED = null;
+    let TR_AUTO_SELECT_QUERY = null;
+
+    async function findTranscripts() {
+      const btn = document.getElementById('trFindBtn');
+      const busy = document.getElementById('busy');
+      btn.disabled = true;
+      document.getElementById('tr_results').textContent = '';
+      document.getElementById('tr_qa').style.display = 'none';
+      TR_SELECTED = null;
+
+      if (busy) { document.getElementById('busyText').textContent = 'Searching...'; busy.hidden = false; }
+
+      try {
+        const data = await apiCall({
+          action: 'findTranscripts',
+          from: document.getElementById('tr_from').value,
+          to: document.getElementById('tr_to').value,
+          keywords: document.getElementById('tr_kw').value,
+          limit: 10
+        });
+        
+        if (!data?.ok) {
+          document.getElementById('tr_results').innerHTML = `<div class="error-msg">${escapeHtml(data?.error || "Search failed")}</div>`;
+        } else {
+          renderTranscriptResults(data.results || []);
+        }
+      } catch (err) {
+        document.getElementById('tr_results').innerHTML = `<div class="error-msg">${escapeHtml(err.message)}</div>`;
+      } finally {
+        btn.disabled = false;
+        if (busy) busy.hidden = true;
+      }
+    }
+
+    function renderTranscriptResults(items) {
+      const el = document.getElementById('tr_results');
+      if (!items?.length) {
+        el.innerHTML = `<div class="chat-empty"><div class="chat-empty-icon">📂</div><p>No transcripts found</p></div>`;
+        return;
+      }
+      el.innerHTML = items.map(f => {
+        const date = (f.modified || '').slice(0, 10);
+        const prev = escapeHtml((f.preview || '').slice(0, 200));
+        return `<div class="report-card" style="cursor:pointer" onclick="selectTranscript('${encodeURIComponent(f.id)}', '${encodeURIComponent(f.name||'')}', '${encodeURIComponent(f.mimeType||'')}', '${encodeURIComponent(f.preview||'')}')">
+          <div class="report-header">
+            <span class="report-date">${date}</span>
+            <span class="report-title">${escapeHtml(f.name || "(untitled)")}</span>
+          </div>
+          <div class="muted" style="font-size: 0.85rem;">${prev}...</div>
+        </div>`;
+      }).join('');
+
+      if (TR_AUTO_SELECT_QUERY) {
+        const q = String(TR_AUTO_SELECT_QUERY || "").toLowerCase().trim();
+        TR_AUTO_SELECT_QUERY = null;
+        if (q) {
+          const hit = (items || []).find(f => String(f.name || "").toLowerCase().includes(q));
+          if (hit) {
+            selectTranscript(
+              encodeURIComponent(hit.id),
+              encodeURIComponent(hit.name || ''),
+              encodeURIComponent(hit.mimeType || ''),
+              encodeURIComponent(hit.preview || '')
+            );
+          }
+        }
+      }
+    }
+
+    function selectTranscript(encId, encName, encMime, encPrev) {
+      TR_SELECTED = {
+        id: decodeURIComponent(encId),
+        name: decodeURIComponent(encName),
+        mimeType: decodeURIComponent(encMime),
+        preview: decodeURIComponent(encPrev)
+      };
+      document.getElementById('tr_meta').innerHTML = `<strong>${escapeHtml(TR_SELECTED.name)}</strong>`;
+      document.getElementById('tr_preview').textContent = TR_SELECTED.preview || '(no preview)';
+      document.getElementById('tr_qa').style.display = 'block';
+      document.getElementById('tr_ans_container').style.display = 'none';
+      document.getElementById('tr_qa').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function setTrPrompt(prompt) {
+      document.getElementById('tr_q').value = prompt;
+    }
+
+    function copyTrResponse() {
+      const el = document.getElementById('tr_ans');
+      const text = el ? el.innerText : '';
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied to clipboard');
+      }).catch(() => {
+        showToast('Failed to copy', 'error');
+      });
+    }
+
+    async function askTranscript() {
+      if (!TR_SELECTED) { alert('Select a transcript first.'); return; }
+      const q = document.getElementById('tr_q').value.trim();
+      if (!q) { document.getElementById('tr_err').textContent = 'Enter a question.'; return; }
+
+      const btn = document.getElementById('trAskBtn');
+      const thinking = document.getElementById('tr_thinking');
+      btn.disabled = true;
+      document.getElementById('tr_err').textContent = '';
+      document.getElementById('tr_ans_container').style.display = 'none';
+      thinking.style.display = 'block';
+
+      try {
+        const data = await apiCall({
+          action: 'askTranscript',
+          id: TR_SELECTED.id,
+          mimeType: TR_SELECTED.mimeType,
+          question: q
+        });
+
+        if (!data?.ok) {
+          document.getElementById('tr_err').textContent = data?.error || 'Failed.';
+        } else {
+          document.getElementById('tr_ans').innerHTML = data.answer || '';
+          document.getElementById('tr_ans_container').style.display = 'block';
+        }
+      } catch (err) {
+        document.getElementById('tr_err').textContent = err.message;
+      } finally {
+        btn.disabled = false;
+        thinking.style.display = 'none';
+      }
+    }
+
+    // Notes
+    async function saveNote() {
+      const btn = document.getElementById("saveNoteBtn");
+      btn.disabled = true;
+      const noteMsg = document.getElementById("noteMsg");
+      noteMsg.innerHTML = "";
+
+      const note = document.getElementById("note").value || "";
+      if (!note.trim()) { 
+        noteMsg.innerHTML = '<span class="error-msg">Please enter note content.</span>'; 
+        btn.disabled = false; 
+        return; 
+      }
+
+      try {
+        const data = await apiCall({
+          action: "addNote",
+          note,
+          meeting_id: document.getElementById("meeting_id").value || "",
+          author: document.getElementById("author").value || "",
+          headline: document.getElementById("note_headline").value || "",
+          countries: document.getElementById("note_countries").value || ""
+        });
+
+        if (!data?.ok) {
+          noteMsg.innerHTML = `<span class="error-msg">Error: ${escapeHtml(data?.error || 'Unknown')}</span>`;
+          showToast('Failed to save note', 'error');
+        } else {
+          noteMsg.innerHTML = '<span style="color: var(--success); font-weight: 500;">✓ Note saved!</span>';
+          showToast('Note saved successfully');
+          document.getElementById("note").value = "";
+          document.getElementById("note_headline").value = "";
+        }
+      } catch (err) {
+        noteMsg.innerHTML = `<span class="error-msg">Error: ${escapeHtml(err.message)}</span>`;
+        showToast('Failed to save note', 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Init
+    qrange(30);
+    updateConversationUI();
+    
+    document.getElementById('question').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        ask();
+      }
+    });
+  </script>
+</body>
+</html>

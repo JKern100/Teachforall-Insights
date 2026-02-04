@@ -1,0 +1,1490 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TFA Insight — AI Knowledge Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+  /* === FRESH MODERN THEME === */
+  :root {
+    --bg: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-input: #f1f5f9;
+    --bg-hover: #e2e8f0;
+    --text: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --primary-light: #eef2ff;
+    --primary-glow: rgba(99, 102, 241, 0.1);
+    --success: #10b981;
+    --success-light: #ecfdf5;
+    --danger: #ef4444;
+    --danger-light: #fef2f2;
+    --warning: #f59e0b;
+    --border: #e2e8f0;
+    --border-focus: #6366f1;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+    --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.08), 0 10px 10px -5px rgba(0,0,0,0.03);
+    --radius: 12px;
+    --radius-lg: 16px;
+    --radius-full: 9999px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  html { font-size: 15px; scroll-behavior: smooth; }
+  
+  body { 
+    background: var(--bg);
+    color: var(--text); 
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* === LAYOUT === */
+  .app-container {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* === SIDEBAR === */
+  .sidebar {
+    width: 260px;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    margin-bottom: 32px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--primary), #8b5cf6);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  
+  h1 { 
+    font-size: 1.5rem; 
+    font-weight: 700; 
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--text), var(--text-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .version-badge { 
+    color: var(--muted); 
+    font-size: 0.7rem; 
+    font-weight: 500;
+    padding: 4px 10px; 
+    background: var(--bg-elevated); 
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    letter-spacing: 0.02em;
+  }
+  
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ok);
+    padding: 8px 14px;
+    background: var(--ok-bg);
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(52, 211, 153, 0.2);
+  }
+  
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--ok);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(0.95); }
+  }
+
+  /* === CARDS === */
+  .card { 
+    background: var(--panel);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border); 
+    border-radius: var(--radius-lg); 
+    padding: 24px; 
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+  
+  .card:hover {
+    border-color: var(--border-hover);
+  }
+  
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .card-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--accent-glow);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* === TABS === */
+  .tabs { 
+    display: flex; 
+    gap: 8px; 
+    margin-bottom: 24px; 
+    padding: 6px;
+    background: var(--bg-elevated);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  
+  .tabs::-webkit-scrollbar { display: none; }
+  
+  .tab-btn {
+    flex: 1;
+    min-width: max-content;
+    background: transparent; 
+    border: none; 
+    color: var(--muted);
+    padding: 12px 20px; 
+    border-radius: var(--radius-md); 
+    cursor: pointer; 
+    transition: all var(--transition-fast);
+    font-size: 0.9rem; 
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .tab-btn:hover { 
+    color: var(--text); 
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .tab-btn.active {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 2px 8px rgba(107, 138, 253, 0.3);
+  }
+  
+  .tab-view[hidden] { display: none !important; }
+
+  /* === TYPOGRAPHY === */
+  label { 
+    display: block; 
+    font-size: 0.8rem; 
+    font-weight: 500;
+    color: var(--text-secondary); 
+    margin: 0 0 8px;
+    letter-spacing: 0.01em;
+  }
+  
+  .label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .label-hint {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-weight: 400;
+  }
+  
+  .muted { color: var(--muted); }
+  .error { color: var(--danger); font-weight: 500; }
+  
+  .tag { 
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem; 
+    padding: 4px 10px; 
+    background: var(--bg-elevated);
+    border: 1px solid var(--border); 
+    border-radius: var(--radius-full); 
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* === FORM ELEMENTS === */
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  input[type="text"], input[type="date"], select, textarea {
+    width: 100%; 
+    padding: 12px 16px; 
+    border-radius: var(--radius-md); 
+    border: 1px solid var(--border); 
+    background: var(--bg-elevated); 
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: all var(--transition-fast);
+  }
+  
+  input[type="text"]:hover, input[type="date"]:hover, select:hover, textarea:hover {
+    border-color: var(--border-hover);
+  }
+  
+  input[type="text"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  
+  input::placeholder, textarea::placeholder {
+    color: var(--muted);
+  }
+  
+  textarea { 
+    min-height: 130px; 
+    resize: vertical;
+    line-height: 1.6;
+  }
+  
+  select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237a84a3' viewBox='0 0 16 16'%3E%3Cpath d='M4.646 5.646a.5.5 0 0 1 .708 0L8 8.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 40px;
+  }
+
+  /* === BUTTONS === */
+  button {
+    padding: 12px 20px; 
+    border-radius: var(--radius-md); 
+    border: 1px solid var(--border);
+    background: var(--bg-elevated); 
+    color: var(--text); 
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  button:hover:not(:disabled) { 
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--border-hover);
+    transform: translateY(-1px);
+  }
+  
+  button:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  
+  button.primary { 
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+    box-shadow: 0 2px 8px rgba(107, 138, 253, 0.25);
+  }
+  
+  button.primary:hover:not(:disabled) { 
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    box-shadow: 0 4px 16px rgba(107, 138, 253, 0.35);
+  }
+  
+  button:disabled { 
+    opacity: 0.5; 
+    cursor: not-allowed;
+    transform: none !important;
+  }
+  
+  .btn-sm {
+    padding: 8px 14px;
+    font-size: 0.8rem;
+  }
+
+  /* === GRID & FLEX === */
+  .row { display: flex; flex-wrap: wrap; gap: 16px; }
+  .row > div { flex: 1 1 280px; min-width: 200px; }
+  .row-3 > div { flex: 1 1 calc(33.33% - 12px); min-width: 200px; }
+  .btns { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+  .btns button { flex: 1; min-width: 120px; }
+  .btns-sm { gap: 8px; margin-top: 0; }
+  .btns-sm button { flex: 0 0 auto; min-width: auto; }
+  
+  @media (max-width: 768px) {
+    .wrap { padding: 20px 16px 100px; }
+    .row > div, .row-3 > div { flex-basis: 100%; }
+    .header { flex-direction: column; gap: 16px; align-items: flex-start; }
+    .btns button { flex: 1 1 100%; }
+  }
+
+  /* === ANSWER BOX === */
+  .answer { 
+    background: var(--bg-elevated); 
+    border: 1px solid var(--border); 
+    border-radius: var(--radius-md); 
+    padding: 20px; 
+    min-height: 100px;
+    line-height: 1.7;
+  }
+  
+  .answer:empty::before {
+    content: 'Your answer will appear here...';
+    color: var(--muted);
+    font-style: italic;
+  }
+  
+  .answer h2, .answer h3, .answer h4 {
+    color: var(--accent);
+    font-weight: 600;
+    margin: 1rem 0 0.5rem;
+  }
+  
+  .answer h2:first-child, .answer h3:first-child, .answer h4:first-child {
+    margin-top: 0;
+  }
+  
+  .answer p { margin: 0.5rem 0; }
+  .answer ul, .answer ol { margin: 0.5rem 0 0.5rem 1.5rem; }
+  .answer li { margin: 0.3rem 0; }
+  .answer a { color: var(--accent); }
+  .answer code {
+    background: rgba(107, 138, 253, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+
+  /* === LOADING STATE === */
+  .busy { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    padding: 16px 20px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(107, 138, 253, 0.2);
+    border-radius: var(--radius-md);
+    margin: 16px 0;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  
+  .busy[hidden] { display: none; }
+  
+  .spinner {
+    width: 20px; 
+    height: 20px; 
+    border: 2px solid rgba(107, 138, 253, 0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%; 
+    animation: spin 0.8s linear infinite;
+  }
+  
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* === DETAILS/DEBUG === */
+  details { margin-top: 16px; }
+  
+  details summary { 
+    cursor: pointer; 
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding: 8px 0;
+    transition: color var(--transition-fast);
+  }
+  
+  details summary:hover { color: var(--text-secondary); }
+  
+  details[open] summary { color: var(--text-secondary); }
+  
+  #debug {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    background: var(--bg);
+    padding: 16px;
+    border-radius: var(--radius-sm);
+    margin-top: 12px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 300px;
+    overflow: auto;
+    border: 1px solid var(--border);
+  }
+
+  /* === SOURCES === */
+  #sources .tag {
+    margin-right: 8px;
+    margin-bottom: 8px;
+  }
+
+  /* === REPORTS === */
+  .report-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: border-color var(--transition-fast);
+  }
+  
+  .report-card:hover {
+    border-color: var(--border-hover);
+  }
+  
+  .report-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  
+  .report-content {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+  
+  .report-content * {
+    background-color: transparent !important; 
+    color: inherit !important;
+    box-shadow: none !important;              
+    border: none !important;                  
+    font-family: inherit !important;          
+  }
+  
+  .report-content strong, .report-content b,
+  .report-content h1, .report-content h2, .report-content h3, .report-content h4 {
+    color: var(--text) !important; 
+    font-weight: 600 !important;
+    margin: 1rem 0 0.5rem !important;
+  }
+  
+  .report-content ul, .report-content ol {
+    margin-left: 20px !important;
+    margin-bottom: 10px !important;
+  }
+  
+  .report-content li { margin-bottom: 6px !important; }
+  
+  .report-content a {
+    color: var(--accent) !important;
+    text-decoration: underline !important;
+  }
+
+  /* === TRANSCRIPT CARD === */
+  .transcript-item {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin: 12px 0;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+  
+  .transcript-item:hover {
+    border-color: var(--accent);
+    background: rgba(107, 138, 253, 0.03);
+  }
+  
+  .transcript-item label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    margin: 0;
+  }
+  
+  .transcript-item input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+  }
+  
+  .transcript-preview {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  /* === TOAST NOTIFICATIONS === */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .toast {
+    padding: 14px 20px;
+    border-radius: var(--radius-md);
+    background: var(--panel-solid);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease;
+    max-width: 360px;
+  }
+  
+  .toast.success {
+    border-color: rgba(52, 211, 153, 0.3);
+    background: linear-gradient(135deg, var(--panel-solid), rgba(52, 211, 153, 0.05));
+  }
+  
+  .toast.error {
+    border-color: rgba(248, 113, 113, 0.3);
+    background: linear-gradient(135deg, var(--panel-solid), rgba(248, 113, 113, 0.05));
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* === EMPTY STATE === */
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+  }
+  
+  .empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  /* === CHAT MESSAGES === */
+  .chat-message {
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+    line-height: 1.6;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .chat-message.user {
+    background: var(--accent-glow);
+    border: 1px solid rgba(107, 138, 253, 0.2);
+    margin-left: 32px;
+  }
+  
+  .chat-message.user::before {
+    content: '👤 You';
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  
+  .chat-message.assistant {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    margin-right: 32px;
+  }
+  
+  .chat-message.assistant::before {
+    content: '🤖 AI';
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ok);
+    margin-bottom: 6px;
+  }
+  
+  .chat-message h2, .chat-message h3, .chat-message h4 {
+    color: var(--accent);
+    font-weight: 600;
+    margin: 0.8rem 0 0.4rem;
+  }
+  
+  .chat-message h2:first-of-type, .chat-message h3:first-of-type {
+    margin-top: 0;
+  }
+  
+  .chat-message p { margin: 0.4rem 0; }
+  .chat-message ul, .chat-message ol { margin: 0.5rem 0 0.5rem 1.5rem; }
+  .chat-message li { margin: 0.25rem 0; }
+  .chat-message a { color: var(--accent); }
+  
+  .chat-empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  /* === SCROLLBAR === */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--bg);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--border-hover);
+  }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Enhanced Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">
+          <div class="logo-icon">💡</div>
+          <div>
+            <h1>Teach For All</h1>
+          </div>
+        </div>
+        <span class="version-badge">v2.0 Local</span>
+      </div>
+      <div class="status-indicator" id="status-indicator">
+        <span class="status-dot"></span>
+        System Ready
+      </div>
+    </header>
+
+    <!-- Enhanced Tabs -->
+    <nav class="tabs">
+        <button class="tab-btn active" onclick="switchTab('ask')">
+          <span>🤖</span> Ask AI
+        </button>
+        <button class="tab-btn" onclick="switchTab('reports')">
+          <span>📄</span> Reports
+        </button>
+        <button class="tab-btn" onclick="switchTab('transcripts')">
+          <span>🔍</span> Transcripts
+        </button>
+        <button class="tab-btn" onclick="switchTab('notes')">
+          <span>📝</span> Add Note
+        </button>
+    </nav>
+
+    <div id="view-ask" class="tab-view">
+        <!-- Filters Card -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">🔎</div>
+            <span class="card-title">Search Filters</span>
+          </div>
+          
+          <div class="row row-3">
+            <div class="form-group">
+              <label>From date</label>
+              <input id="from" type="date" />
+            </div>
+            <div class="form-group">
+              <label>To date</label>
+              <input id="to" type="date" />
+            </div>
+            <div class="form-group">
+              <label>Quick ranges</label>
+              <div class="btns btns-sm" style="margin-top:0">
+                <button class="btn-sm" onclick="qrange(7)">7 days</button>
+                <button class="btn-sm" onclick="qrange(31)">1 month</button>
+                <button class="btn-sm" onclick="qrange(92)">3 months</button>
+                <button class="btn-sm" onclick="clearDates()">Clear</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="form-group">
+              <label>Type</label>
+              <select id="type">
+                <option value="all">All types</option>
+                <option value="Zoom Meeting">Zoom Meeting</option>
+                <option value="Email">Email</option>
+                <option value="Note">Note</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Countries</label>
+              <input id="countries" type="text" placeholder="e.g., Portugal, Spain" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="form-group">
+              <label>Topic <span class="label-hint">(optional)</span></label>
+              <input id="topic" type="text" placeholder="standards, onboarding, budget…" />
+            </div>
+            <div class="form-group">
+              <label>Search depth</label>
+              <select id="speed">
+                <option value="30">Fast (~30 records)</option>
+                <option value="100" selected>Balanced (~100 records)</option>
+                <option value="300">Thorough (~300 records)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conversation Card -->
+        <div class="card">
+          <div class="card-header" style="justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="card-icon">💬</div>
+              <span class="card-title">Conversation</span>
+              <span id="convStatus" class="tag" style="font-size: 0.7rem;"></span>
+            </div>
+            <button class="btn-sm" onclick="newConversation()" style="flex: 0 0 auto; width: auto;">
+              <span>🔄</span> New Chat
+            </button>
+          </div>
+          
+          <!-- Conversation History -->
+          <div id="conversationHistory" style="margin-bottom: 16px;"></div>
+          
+          <!-- Question Input -->
+          <div class="form-group" style="margin-bottom: 12px;">
+            <textarea id="question" placeholder="Ask your question… e.g., What was my last meeting with Bea about?" style="min-height: 80px;"></textarea>
+          </div>
+
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <div class="form-group" style="flex: 0 0 150px; margin: 0;">
+              <select id="style">
+                <option value="normal" selected>Detailed</option>
+                <option value="short">Concise</option>
+              </select>
+            </div>
+            <button id="askBtn" class="primary" onclick="ask()" style="flex: 1; min-width: 120px;">
+              <span>✨</span> Send
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="busy" class="busy" hidden aria-live="polite">
+          <span class="spinner"></span>
+          <span id="busyText">Thinking…</span>
+        </div>
+
+        <!-- Error Display -->
+        <div id="err" class="error" style="margin: 12px 0;"></div>
+
+        <!-- Sources Card -->
+        <div class="card" id="sourcesCard" style="display: none;">
+          <div class="card-header">
+            <div class="card-icon">�</div>
+            <span class="card-title">Sources Used</span>
+          </div>
+          <div id="sources" class="muted"></div>
+          
+          <details style="margin-top: 12px;">
+            <summary>🔧 Debug Info</summary>
+            <div id="debug"></div>
+          </details>
+        </div>
+    </div>
+
+    <!-- Reports View -->
+    <div id="view-reports" class="tab-view" hidden>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">📄</div>
+            <span class="card-title">Weekly Partner Reports</span>
+          </div>
+          
+          <div class="row">
+            <div class="form-group">
+              <label>From Date</label>
+              <input id="rep_from" type="date" />
+            </div>
+            <div class="form-group">
+              <label>To Date</label>
+              <input id="rep_to" type="date" />
+            </div>
+          </div>
+          
+          <div class="btns">
+            <button id="repBtn" class="primary" onclick="getPartnerReports()">
+              <span>📥</span> Load Reports
+            </button>
+            <button onclick="setRepDates(7)">Past 7 days</button>
+            <button onclick="setRepDates(30)">Past 30 days</button>
+          </div>
+        </div>
+        
+        <div id="rep_container"></div>
+        <div id="rep_err" class="error" style="margin-top:12px;"></div>
+    </div>
+
+    <!-- Transcripts View -->
+    <div id="view-transcripts" class="tab-view" hidden>
+        <div class="card" id="tr_card">
+          <div class="card-header">
+            <div class="card-icon">🔍</div>
+            <span class="card-title">Search Transcripts</span>
+          </div>
+          
+          <div class="row">
+            <div class="form-group">
+              <label>From date</label>
+              <input id="tr_from" type="date" />
+            </div>
+            <div class="form-group">
+              <label>To date</label>
+              <input id="tr_to" type="date" />
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Keywords <span class="label-hint">(searches filename and contents)</span></label>
+            <input id="tr_kw" type="text" placeholder="e.g., Portugal, Tiago, budget" />
+          </div>
+          
+          <div class="btns">
+            <button id="trFindBtn" class="primary" onclick="findTranscripts()">
+              <span>🔎</span> Find Transcripts
+            </button>
+          </div>
+          
+          <div id="tr_results" style="margin-top:20px;"></div>
+        </div>
+
+        <div class="card" id="tr_qa" hidden>
+          <div class="card-header">
+            <div class="card-icon">💬</div>
+            <span class="card-title">Ask About Transcript</span>
+          </div>
+          
+          <div id="tr_meta" class="muted" style="margin-bottom:12px;"></div>
+          <pre id="tr_preview" style="white-space:pre-wrap;background:var(--bg);padding:16px;border-radius:var(--radius-md);border:1px solid var(--border);max-height:200px;overflow:auto;font-size:0.85rem;color:var(--muted);"></pre>
+          
+          <div class="form-group" style="margin-top:20px;">
+            <label>Your question about this transcript</label>
+            <textarea id="tr_q" placeholder="Ask a question about the selected transcript…"></textarea>
+          </div>
+          
+          <div class="btns">
+            <button id="trAskBtn" class="primary" onclick="askTranscript()">
+              <span>✨</span> Ask About Transcript
+            </button>
+          </div>
+          
+          <div id="tr_ans" class="answer" style="margin-top:20px;"></div>
+          <div id="tr_err" class="error" style="margin-top:12px;"></div>
+        </div>
+    </div>
+
+    <!-- Notes View -->
+    <div id="view-notes" class="tab-view" hidden>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">📝</div>
+            <span class="card-title">Add New Note</span>
+          </div>
+          
+          <div class="form-group">
+            <label>Note content</label>
+            <textarea id="note" placeholder="Write your note here… This will be saved to the database and can be searched later."></textarea>
+          </div>
+          
+          <div class="row">
+            <div class="form-group">
+              <label>Headline <span class="label-hint">(optional)</span></label>
+              <input id="note_headline" type="text" placeholder="e.g., Dev Community call — key decisions" />
+            </div>
+            <div class="form-group">
+              <label>Countries <span class="label-hint">(optional)</span></label>
+              <input id="note_countries" type="text" placeholder="e.g., Portugal, Spain" />
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="form-group">
+              <label>Meeting ID <span class="label-hint">(optional)</span></label>
+              <input id="meeting_id" type="text" placeholder="e.g., r1" />
+            </div>
+            <div class="form-group">
+              <label>Author <span class="label-hint">(optional)</span></label>
+              <input id="author" type="text" placeholder="Your name or email" />
+            </div>
+          </div>
+          
+          <div class="btns">
+            <button id="saveNoteBtn" class="primary" onclick="saveNote()">
+              <span>💾</span> Save Note
+            </button>
+          </div>
+          
+          <div id="noteMsg" style="margin-top:16px;"></div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+  </div>
+
+  <script>
+    // ========= CONFIG =========
+    const API_BASE = "/api";
+
+    // ========= TOAST NOTIFICATIONS =========
+    function showToast(message, type = 'success', duration = 4000) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+        <span>${escapeHtml(message)}</span>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
+
+    // ========= TABS LOGIC =========
+    function switchTab(name) {
+      document.querySelectorAll('.tab-view').forEach(el => el.hidden = true);
+      document.getElementById('view-' + name).hidden = false;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.querySelector(`button[onclick="switchTab('${name}')"]`);
+      if(activeBtn) activeBtn.classList.add('active');
+    }
+
+    // ========= API HELPER =========
+    async function apiCall(params, timeoutMs = 60000) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+      
+      try {
+        const qs = new URLSearchParams(params);
+        const response = await fetch(API_BASE + '?' + qs.toString(), {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          signal: controller.signal
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        return await response.json();
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    // ========= UI HELPERS =========
+    function todayIso(d = new Date()) { return d.toISOString().slice(0,10); }
+    function daysAgoIso(n) { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0,10); }
+    function escapeHtml(x) { return (x||"").replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+    // ========= WEEKLY REPORTS =========
+    function setRepDates(n) {
+      document.getElementById("rep_from").value = daysAgoIso(n);
+      document.getElementById("rep_to").value = todayIso();
+    }
+
+    async function getPartnerReports() {
+      const btn = document.getElementById('repBtn');
+      const container = document.getElementById('rep_container');
+      const err = document.getElementById('rep_err');
+      const busy = document.getElementById('busy');
+
+      container.innerHTML = "";
+      err.textContent = "";
+      btn.disabled = true;
+      if(busy) { busy.hidden = false; document.getElementById('busyText').textContent = "Loading reports..."; }
+
+      try {
+        const data = await apiCall({
+          action: 'getReports',
+          from: document.getElementById('rep_from').value,
+          to: document.getElementById('rep_to').value
+        }, 30000);
+
+        if (!data || data.ok === false) {
+          err.textContent = (data && data.error) ? data.error : "Failed to load reports.";
+        } else if (!data.reports || data.reports.length === 0) {
+          container.innerHTML = "<div class='muted'>No reports found for this period.</div>";
+        } else {
+          renderReports(data.reports);
+        }
+      } catch (e) {
+        err.textContent = "Error: " + e.message;
+      } finally {
+        btn.disabled = false;
+        if(busy) busy.hidden = true;
+      }
+    }
+
+    function renderReports(items) {
+      const container = document.getElementById('rep_container');
+      if (!items.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p>No reports found for this date range</p>
+          </div>`;
+        return;
+      }
+      
+      const html = items.map(item => {
+        let raw = item.summary_text || "";
+        raw = raw.replace(/```html/gi, "").replace(/```/g, "").trim();
+
+        try {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(raw, "text/html");
+          if (doc.body && doc.body.childNodes.length > 0) {
+             raw = doc.body.innerHTML;
+          }
+        } catch (e) { console.warn("HTML parse warning", e); }
+
+        return `
+          <div class="report-card">
+            <div class="report-header">
+              <span class="tag">${escapeHtml(item.date_iso)}</span>
+              <strong style="font-size:1rem;">${escapeHtml(item.title)}</strong>
+              ${item.countries ? `<span class="tag" style="margin-left:auto;">${escapeHtml(item.countries)}</span>` : ""}
+            </div>
+            <div class="report-content">
+              ${raw || "<span class='muted'>(No content)</span>"}
+            </div>
+          </div>
+        `;
+      }).join("");
+      container.innerHTML = html;
+    }
+
+    // ================== TRANSCRIPTS ==================
+    let TR_SELECTED = null;
+
+    function trCollect() {
+      return {
+        from: document.getElementById('tr_from').value || '',
+        to: document.getElementById('tr_to').value || '',
+        keywords: document.getElementById('tr_kw').value || '',
+        limit: 10
+      };
+    }
+
+    async function findTranscripts() {
+      const btn = document.getElementById('trFindBtn');
+      const busy = document.getElementById('busy');
+      const busyText = document.getElementById('busyText');
+
+      btn.disabled = true;
+      document.getElementById('tr_results').textContent = '';
+      document.getElementById('tr_qa').hidden = true;
+      TR_SELECTED = null;
+
+      if (busy) { busyText.textContent = 'Searching local files…'; busy.hidden = false; }
+
+      try {
+        const p = trCollect();
+        const data = await apiCall({ action: 'findTranscripts', ...p }, 90000);
+        if (!data || data.ok === false) {
+          document.getElementById('tr_results').innerHTML =
+            "<span class='error'>" + (data && data.error ? escapeHtml(data.error) : "Search failed") + "</span>";
+        } else {
+          renderTranscriptResults(data.results || []);
+        }
+      } catch (err) {
+        document.getElementById('tr_results').innerHTML = "<span class='error'>" + escapeHtml(err.message) + "</span>";
+      } finally {
+        btn.disabled = false;
+        if (busy) busy.hidden = true;
+      }
+    }
+
+    function renderTranscriptResults(items) {
+      const el = document.getElementById('tr_results');
+      if (!items || !items.length) {
+        el.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📂</div>
+            <p>No transcripts found matching your criteria</p>
+          </div>`;
+        return;
+      }
+      el.innerHTML = items.map((f) => {
+        const date = (f.modified || '').slice(0, 10);
+        const prev = (f.preview || '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+        return `
+          <div class="transcript-item">
+            <label>
+              <input type="radio" name="tr_pick"
+                   data-id="${f.id}"
+                   data-name="${encodeURIComponent(f.name || '')}"
+                   data-mime="${encodeURIComponent(f.mimeType || '')}"
+                   data-prev="${encodeURIComponent(prev)}"
+                   data-link="${encodeURIComponent(f.link || '')}">
+              <strong>${escapeHtml(f.name || "(untitled)")}</strong>
+              <span class="tag">${date}</span>
+              ${f.link ? `<a href="${f.link}" target="_blank" style="margin-left:auto; color:var(--accent);">Open ↗</a>` : ""}
+            </label>
+            <div class="transcript-preview">
+              ${prev ? prev.slice(0, 300) + '…' : '(no preview available)'}
+            </div>
+          </div>`;
+      }).join('');
+
+      if (!el._wired) {
+        const handler = (ev) => {
+          const r = ev.target.closest('input[name="tr_pick"]');
+          if (!r) return;
+          selectTranscript(
+            r.dataset.id,
+            r.dataset.name,
+            r.dataset.mime,
+            r.dataset.prev,
+            r.dataset.link
+          );
+          setTimeout(() => document.getElementById('tr_q')?.focus(), 0);
+        };
+        el.addEventListener('input', handler);
+        el.addEventListener('change', handler);
+        el._wired = true;
+      }
+    }
+
+    function selectTranscript(id, encName, encMime, encPrev, encLink) {
+      TR_SELECTED = {
+        id,
+        name: decodeURIComponent(encName || ''),
+        mimeType: decodeURIComponent(encMime || ''),
+        preview: decodeURIComponent(encPrev || ''),
+        link: decodeURIComponent(encLink || '')
+      };
+      document.getElementById('tr_meta').innerHTML =
+        `<strong>${escapeHtml(TR_SELECTED.name)}</strong> ${TR_SELECTED.link ? `• <a href="${TR_SELECTED.link}" target="_blank">Open</a>` : ''}`;
+      document.getElementById('tr_preview').textContent = TR_SELECTED.preview || '(preview unavailable)';
+      document.getElementById('tr_qa').hidden = false;
+      document.getElementById('tr_qa').scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+
+    async function askTranscript() {
+      if (!TR_SELECTED) { alert('Please choose a transcript.'); return; }
+      const q = (document.getElementById('tr_q').value || '').trim();
+      if (!q) { document.getElementById('tr_err').textContent = 'Please enter a question.'; return; }
+
+      const btn = document.getElementById('trAskBtn');
+      const busy = document.getElementById('busy');
+      const busyText = document.getElementById('busyText');
+
+      btn.disabled = true;
+      document.getElementById('tr_err').textContent = '';
+      document.getElementById('tr_ans').innerHTML = '';
+
+      if (busy) { busyText.textContent = 'Reading transcript…'; busy.hidden = false; }
+
+      try {
+        const data = await apiCall({
+          action: 'askTranscript',
+          id: TR_SELECTED.id,
+          mimeType: TR_SELECTED.mimeType,
+          question: q
+        }, 120000);
+
+        if (!data || data.ok === false) {
+          document.getElementById('tr_err').textContent = (data && data.error) ? data.error : 'Failed.';
+        } else {
+          document.getElementById('tr_ans').innerHTML = data.answer || '';
+        }
+      } catch (err) {
+        document.getElementById('tr_err').textContent = err.message;
+      } finally {
+        btn.disabled = false;
+        if (busy) busy.hidden = true;
+      }
+    }
+
+    function qrange(n) {
+      document.getElementById("from").value = daysAgoIso(n);
+      document.getElementById("to").value = todayIso();
+    }
+    function clearDates() {
+      document.getElementById("from").value = "";
+      document.getElementById("to").value = "";
+    }
+    function resetForm() {
+      document.getElementById("question").value = "";
+      document.getElementById("topic").value = "";
+      document.getElementById("countries").value = "";
+      document.getElementById("type").value = "all";
+      document.getElementById("speed").value = "100";
+      document.getElementById("style").value = "normal";
+      clearDates();
+      newConversation();
+      document.getElementById("note").value = "";
+      document.getElementById("meeting_id").value = "";
+      document.getElementById("author").value = "";
+      document.getElementById("noteMsg").textContent = "";
+    }
+
+    // ========= CONVERSATION STATE =========
+    const SESSION_ID = 'session_' + Date.now();
+    let conversationMessages = [];
+    
+    function updateConversationUI() {
+      const container = document.getElementById('conversationHistory');
+      const status = document.getElementById('convStatus');
+      const sourcesCard = document.getElementById('sourcesCard');
+      
+      if (conversationMessages.length === 0) {
+        container.innerHTML = `<div class="chat-empty">💡 Ask a question to start the conversation</div>`;
+        status.textContent = '';
+        sourcesCard.style.display = 'none';
+        return;
+      }
+      
+      status.textContent = `${conversationMessages.length} messages`;
+      
+      container.innerHTML = conversationMessages.map(msg => `
+        <div class="chat-message ${msg.role}">
+          ${msg.role === 'user' ? escapeHtml(msg.text) : msg.text}
+        </div>
+      `).join('');
+      
+      // Scroll to bottom
+      container.scrollTop = container.scrollHeight;
+    }
+    
+    async function newConversation() {
+      try {
+        await apiCall({ action: 'clearConversation', sessionId: SESSION_ID });
+      } catch (e) {
+        console.warn('Failed to clear server conversation:', e);
+      }
+      conversationMessages = [];
+      updateConversationUI();
+      document.getElementById('question').value = '';
+      document.getElementById('err').textContent = '';
+      document.getElementById('sourcesCard').style.display = 'none';
+      showToast('Started new conversation', 'success');
+    }
+    
+    function setSources(srcs) {
+      const el = document.getElementById("sources");
+      const card = document.getElementById("sourcesCard");
+      if (!srcs || !srcs.length) { 
+        el.innerHTML = "<span class='muted'>—</span>"; 
+        return; 
+      }
+      card.style.display = 'block';
+      el.innerHTML = srcs.map(s => {
+        const bits = [s.date, s.type, s.countries].filter(Boolean).join(" · ");
+        return `<div style="margin-bottom:6px;"><span class="tag">${bits||"source"}</span> ${escapeHtml(s.title||"")}</div>`;
+      }).join("");
+    }
+    function setDebug(s) { document.getElementById("debug").textContent = s || ""; }
+
+    function collectFilters() {
+      return {
+        from: document.getElementById("from").value || "",
+        to: document.getElementById("to").value || "",
+        type: document.getElementById("type").value || "all",
+        countries: document.getElementById("countries").value || "",
+        topic: document.getElementById("topic").value || "",
+        limit: document.getElementById("speed").value || "100",
+        style: document.getElementById("style").value || "normal",
+        question: document.getElementById("question").value || ""
+      };
+    }
+
+    // ========= ACTIONS =========
+    async function ask() {
+      const btn = document.getElementById("askBtn");
+      const busy = document.getElementById("busy");
+      const errEl = document.getElementById("err");
+      
+      const p = collectFilters();
+      if (!p.question.trim()) { 
+        errEl.textContent = "Please enter a question."; 
+        return; 
+      }
+
+      btn.disabled = true;
+      errEl.textContent = '';
+      busy.hidden = false;
+      
+      // Add user message to UI immediately
+      conversationMessages.push({ role: 'user', text: p.question });
+      updateConversationUI();
+      document.getElementById('question').value = '';
+
+      try {
+        const data = await apiCall({ action: "ask", sessionId: SESSION_ID, ...p }, 90000);
+        if (!data || data.ok === false) {
+          errEl.textContent = "Error: " + (data && data.error ? data.error : "Unknown");
+          // Remove the user message if failed
+          conversationMessages.pop();
+          updateConversationUI();
+        } else {
+          // Add assistant response
+          conversationMessages.push({ role: 'assistant', text: data.answer || '' });
+          updateConversationUI();
+          
+          setSources(data.sources || []);
+          const dbg = [
+            "Conversation length: " + (data.conversationLength || 1),
+            "New context: " + (data.isNewConversation ? "Yes" : "No (follow-up)"),
+            "",
+            "Supabase REST URL:\n" + (data.debug?.rest || ""),
+            "",
+            "SQL (approximate):\n" + (data.debug?.sql_approx || ""),
+            "",
+            "Prompt:\n" + (data.debug?.prompt || "")
+          ].join("\n");
+          setDebug(dbg);
+        }
+      } catch (err) {
+        errEl.textContent = "Error: " + err.message;
+        conversationMessages.pop();
+        updateConversationUI();
+      } finally {
+        busy.hidden = true;
+        btn.disabled = false;
+        document.getElementById('question').focus();
+      }
+    }
+
+    async function saveNote() {
+      const btn = document.getElementById("saveNoteBtn");
+      btn.disabled = true;
+      const noteMsg = document.getElementById("noteMsg");
+      noteMsg.innerHTML = "";
+
+      const p = collectFilters();
+      const note = document.getElementById("note").value || "";
+      const meeting_id = document.getElementById("meeting_id").value || "";
+      const author = document.getElementById("author").value || "";
+      const headline = (document.getElementById("note_headline")?.value || "").trim();
+      const countries = (document.getElementById("note_countries")?.value || "").trim();
+
+      if (!note.trim()) { 
+        noteMsg.innerHTML = "<span class='error'>Please enter some note content.</span>"; 
+        btn.disabled = false; 
+        return; 
+      }
+
+      try {
+        const data = await apiCall({
+          action: "addNote",
+          note,
+          meeting_id,
+          author,
+          headline,
+          countries,
+          from: p.from, to: p.to, type: p.type,
+          topic: p.topic, style: p.style, question: p.question
+        });
+
+        if (!data || data.ok === false) {
+          noteMsg.innerHTML = `<span class="error">Error: ${escapeHtml(data?.error || 'Unknown error')}</span>`;
+          showToast('Failed to save note', 'error');
+        } else {
+          noteMsg.innerHTML = `<span style="color:var(--ok);">✓ Note saved successfully!</span>`;
+          showToast('Note saved to database', 'success');
+          document.getElementById("note").value = "";
+          document.getElementById("note_headline").value = "";
+        }
+      } catch (err) {
+        noteMsg.innerHTML = `<span class="error">Error: ${escapeHtml(err.message)}</span>`;
+        showToast('Failed to save note', 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // ========= INIT =========
+    qrange(30);
+    updateConversationUI();
+    
+    // Allow Enter key to send message
+    document.getElementById('question').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        ask();
+      }
+    });
+  </script>
+</body>
+</html>
