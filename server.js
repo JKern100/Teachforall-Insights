@@ -4,6 +4,7 @@ const cors = require('cors');
 const axios = require('axios');
 const fs = require('fs-extra');
 const path = require('path');
+const { google } = require('googleapis');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,6 +12,32 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Password protection middleware
+app.use((req, res, next) => {
+  const auth = req.headers.authorization;
+  const password = process.env.APP_PASSWORD;
+  
+  if (!password) {
+    return next(); // No password set, skip protection
+  }
+  
+  if (!auth || !auth.startsWith('Basic ')) {
+    res.set('WWW-Authenticate', 'Basic realm=Teach For All Insights');
+    return res.status(401).send('Authentication required');
+  }
+  
+  const base64Credentials = auth.split(' ')[1];
+  const credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
+  const [username, userPassword] = credentials.split(':');
+  
+  if (userPassword !== password) {
+    return res.status(401).send('Invalid credentials');
+  }
+  
+  next();
+});
+
 app.use(express.static('public', { index: false }));
 
 // Constants (from your original code)
@@ -21,6 +48,70 @@ const TEMPERATURE = 0.2;
 const MAX_CONTENT_CHECKS = 200;
 const MAX_TRANSCRIPT_CHARS = 120000;
 const MAX_CONVERSATION_HISTORY = 20; // Keep last 20 messages
+
+// Google Drive integration
+const GDRIVE_FOLDER_ID = process.env.GDRIVE_FOLDER_ID || '';
+
+function getDriveClient() {
+  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  const key = (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
+  if (!email || !key) return null;
+  const auth = new google.auth.JWT(email, null, key, ['https://www.googleapis.com/auth/drive.readonly']);
+  return google.drive({ version: 'v3', auth });
+}
+
+async function gdriveListFiles(folderId, pageToken) {
+  const drive = getDriveClient();
+  if (!drive) throw new Error('Google Drive not configured');
+  const res = await drive.files.list({
+    q: `'${folderId}' in parents and trashed = false`,
+    fields: 'nextPageToken, files(id, name, mimeType, modifiedTime, size)',
+    pageSize: 200,
+    orderBy: 'modifiedTime desc',
+    pageToken: pageToken || undefined
+  });
+  return res.data;
+}
+
+async function gdriveListAllFiles(folderId, depth = 0) {
+  if (depth > 3) return [];
+  let allFiles = [];
+  let pageToken = null;
+  do {
+    const data = await gdriveListFiles(folderId, pageToken);
+    const files = data.files || [];
+    for (const f of files) {
+      if (f.mimeType === 'application/vnd.google-apps.folder') {
+        const subFiles = await gdriveListAllFiles(f.id, depth + 1);
+        allFiles = allFiles.concat(subFiles);
+      } else {
+        allFiles.push(f);
+      }
+    }
+    pageToken = data.nextPageToken;
+  } while (pageToken);
+  return allFiles;
+}
+
+async function gdriveReadFile(fileId) {
+  const drive = getDriveClient();
+  if (!drive) throw new Error('Google Drive not configured');
+  
+  const meta = await drive.files.get({ fileId, fields: 'mimeType' });
+  const mimeType = meta.data.mimeType;
+  
+  if (mimeType === 'application/vnd.google-apps.document') {
+    const res = await drive.files.export({ fileId, mimeType: 'text/plain' }, { responseType: 'text' });
+    return typeof res.data === 'string' ? res.data : String(res.data || '');
+  }
+  
+  const res = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'text' });
+  return typeof res.data === 'string' ? res.data : String(res.data || '');
+}
+
+function useGoogleDrive() {
+  return !!(GDRIVE_FOLDER_ID && process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY);
+}
 
 // In-memory conversation storage (keyed by session ID)
 const conversations = new Map();
@@ -300,8 +391,82 @@ function hasAllowedTranscriptExt(name) {
   return n.endsWith('.txt') || n.endsWith('.vtt') || n.endsWith('.srt');
 }
 
-// Find transcripts in local folder
+// Find transcripts (Google Drive or local folder)
 async function findTranscripts(p) {
+  if (useGoogleDrive()) {
+    return findTranscriptsGDrive(p);
+  }
+  return findTranscriptsLocal(p);
+}
+
+async function findTranscriptsGDrive(p) {
+  const limit = Math.min(Number(p.limit || 10), 50);
+  const fromIso = parseDateInput(p.from, false);
+  const toIso = parseDateInput(p.to, true);
+  const fromMs = fromIso ? Date.parse(fromIso) : null;
+  const toMs = toIso ? Date.parse(toIso) : null;
+
+  const kws = String(p.keywords || "")
+    .split(/[,\s]+/)
+    .map(s => s.trim())
+    .filter(Boolean)
+    .map(s => s.toLowerCase());
+
+  try {
+    const allFiles = await gdriveListAllFiles(GDRIVE_FOLDER_ID);
+    
+    const transcriptFiles = allFiles.filter(f => {
+      const name = String(f.name || '').toLowerCase();
+      return name.endsWith('.txt') || name.endsWith('.vtt') || name.endsWith('.srt') ||
+             f.mimeType === 'application/vnd.google-apps.document';
+    });
+
+    const results = [];
+    let checks = 0;
+
+    for (const f of transcriptFiles) {
+      if (results.length >= limit) break;
+
+      const nameMs = parseNameTimestampMs(f.name) || (f.modifiedTime ? Date.parse(f.modifiedTime) : Date.now());
+
+      if (fromMs && nameMs < fromMs) continue;
+      if (toMs && nameMs >= toMs) continue;
+
+      let hit = kws.length ? anyKeywordHit(f.name, kws) : true;
+      let preview = "";
+
+      if (!hit && kws.length && checks < MAX_CONTENT_CHECKS) {
+        try {
+          const body = await gdriveReadFile(f.id);
+          checks++;
+          hit = anyKeywordHit(body, kws);
+          if (hit) preview = makePreview(body, 500);
+        } catch (err) {
+          // Skip files that can't be read
+        }
+      }
+
+      if (hit) {
+        results.push({
+          id: 'gdrive:' + f.id,
+          name: f.name,
+          mimeType: f.mimeType || 'text/plain',
+          modified: f.modifiedTime || new Date(nameMs).toISOString(),
+          link: `https://drive.google.com/file/d/${f.id}/view`,
+          preview: preview
+        });
+      }
+    }
+
+    results.sort((a, b) => (b.modified || "").localeCompare(a.modified || ""));
+    return { ok: true, results: results.slice(0, limit) };
+  } catch (err) {
+    console.error('Google Drive error:', err.message);
+    return { ok: false, error: "Google Drive error: " + err.message };
+  }
+}
+
+async function findTranscriptsLocal(p) {
   const limit = Math.min(Number(p.limit || 10), 50);
   const fromIso = parseDateInput(p.from, false);
   const toIso = parseDateInput(p.to, true);
@@ -324,7 +489,7 @@ async function findTranscripts(p) {
   let checks = 0;
 
   async function scanFolder(folderPath, depth = 0) {
-    if (depth > 3 || results.length >= limit) return; // Prevent infinite recursion
+    if (depth > 3 || results.length >= limit) return;
 
     const items = await fs.readdir(folderPath);
     
@@ -389,7 +554,12 @@ async function askTranscript(p) {
 
   let raw;
   try {
-    raw = await fs.readFile(id, 'utf8') || "";
+    if (id.startsWith('gdrive:')) {
+      const fileId = id.replace('gdrive:', '');
+      raw = await gdriveReadFile(fileId) || "";
+    } else {
+      raw = await fs.readFile(id, 'utf8') || "";
+    }
   } catch (e) {
     return { ok: false, error: "Failed to read transcript: " + e.message };
   }
@@ -548,7 +718,7 @@ app.get('/', (req, res) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Teach For All Insight server running on http://localhost:${PORT}`);
-  console.log(`📁 Transcripts folder: ${process.env.TRANSCRIPTS_FOLDER || './transcripts'}`);
+  console.log(`📁 Transcripts: ${useGoogleDrive() ? 'Google Drive (folder ' + GDRIVE_FOLDER_ID + ')' : (process.env.TRANSCRIPTS_FOLDER || './transcripts')}`);
   console.log(`🗄️  Supabase URL: ${SUPABASE_URL || 'Not configured'}`);
   console.log(`🤖 Gemini API: ${process.env.GEMINI_API_KEY ? 'Configured' : 'Not configured'}`);
 });
