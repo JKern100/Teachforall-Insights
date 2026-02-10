@@ -52,16 +52,54 @@ const MAX_CONVERSATION_HISTORY = 20; // Keep last 20 messages
 // Google Drive integration
 const GDRIVE_FOLDER_ID = process.env.GDRIVE_FOLDER_ID || '';
 
-function getDriveClient() {
+let _driveAuthClient = null;
+
+function getGoogleCredentials() {
+  // Option 1: JSON key file path (simplest, works locally and on Vercel)
+  const keyFile = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_FILE;
+  if (keyFile) {
+    try {
+      return JSON.parse(require('fs').readFileSync(keyFile, 'utf8'));
+    } catch (e) {
+      console.error('Failed to read key file:', e.message);
+    }
+  }
+
+  // Option 2: Full JSON in env var (for Vercel)
+  const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_JSON;
+  if (keyJson) {
+    try {
+      return JSON.parse(keyJson);
+    } catch (e) {
+      console.error('Failed to parse GOOGLE_SERVICE_ACCOUNT_KEY_JSON:', e.message);
+    }
+  }
+
+  // Option 3: Individual env vars
   const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const key = (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
-  if (!email || !key) return null;
-  const auth = new google.auth.JWT(email, null, key, ['https://www.googleapis.com/auth/drive.readonly']);
-  return google.drive({ version: 'v3', auth });
+  const rawKey = process.env.GOOGLE_PRIVATE_KEY || '';
+  const key = rawKey.replace(/\\n/g, '\n').trim();
+  if (email && key && key.includes('PRIVATE KEY')) {
+    return { client_email: email, private_key: key };
+  }
+
+  return null;
+}
+
+async function getDriveClient() {
+  const creds = getGoogleCredentials();
+  if (!creds) return null;
+
+  const auth = new google.auth.GoogleAuth({
+    credentials: creds,
+    scopes: ['https://www.googleapis.com/auth/drive.readonly']
+  });
+  const client = await auth.getClient();
+  return google.drive({ version: 'v3', auth: client });
 }
 
 async function gdriveListFiles(folderId, pageToken) {
-  const drive = getDriveClient();
+  const drive = await getDriveClient();
   if (!drive) throw new Error('Google Drive not configured');
   const res = await drive.files.list({
     q: `'${folderId}' in parents and trashed = false`,
@@ -94,7 +132,7 @@ async function gdriveListAllFiles(folderId, depth = 0) {
 }
 
 async function gdriveReadFile(fileId) {
-  const drive = getDriveClient();
+  const drive = await getDriveClient();
   if (!drive) throw new Error('Google Drive not configured');
   
   const meta = await drive.files.get({ fileId, fields: 'mimeType' });
@@ -110,7 +148,7 @@ async function gdriveReadFile(fileId) {
 }
 
 function useGoogleDrive() {
-  return !!(GDRIVE_FOLDER_ID && process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY);
+  return !!(GDRIVE_FOLDER_ID && getGoogleCredentials());
 }
 
 // In-memory conversation storage (keyed by session ID)
