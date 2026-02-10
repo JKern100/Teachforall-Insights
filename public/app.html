@@ -788,11 +788,17 @@
         <div id="tr_results"></div>
 
         <div class="card" id="tr_qa" style="display: none;">
-          <div class="card-title" style="margin-bottom: 16px;">
-            <span class="card-title-icon">💬</span> Ask About Transcript
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-title-icon">💬</span> Chat About Transcript
+              <span id="tr_convStatus" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400; margin-left: 8px;"></span>
+            </div>
+            <button class="btn" style="font-size: 0.85rem; padding: 6px 14px;" onclick="newTranscriptConversation()">🔄 New Chat</button>
           </div>
           <div id="tr_meta" class="muted" style="margin-bottom: 12px;"></div>
           <pre id="tr_preview" style="background: var(--bg-input); padding: 16px; border-radius: var(--radius); max-height: 200px; overflow: auto; font-size: 0.8rem; white-space: pre-wrap;"></pre>
+          
+          <div id="trConversationHistory" class="conversation-history" style="margin-top: 16px; min-height: 60px;"></div>
           
           <div style="margin-top: 16px; margin-bottom: 12px;">
             <label style="margin-bottom: 8px; display: block;">Quick Prompts</label>
@@ -806,7 +812,7 @@
           </div>
           
           <div class="form-group">
-            <textarea id="tr_q" placeholder="Ask about this transcript..."></textarea>
+            <textarea id="tr_q" placeholder="Ask about this transcript..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();askTranscript();}"></textarea>
           </div>
           <button class="btn btn-primary" id="trAskBtn" onclick="askTranscript()">✨ Ask</button>
           
@@ -815,15 +821,6 @@
             <div>Analyzing transcript...</div>
           </div>
           
-          <div id="tr_ans_container" style="margin-top: 16px; display: none;">
-            <div class="chat-message assistant">
-              <div class="chat-header">
-                <span class="chat-role">AI Assistant</span>
-                <button class="copy-btn" onclick="copyTrResponse()" title="Copy to clipboard">📋</button>
-              </div>
-              <div class="chat-content" id="tr_ans"></div>
-            </div>
-          </div>
           <div id="tr_err" class="error-msg"></div>
         </div>
       </div>
@@ -1271,6 +1268,8 @@
     // Transcripts
     let TR_SELECTED = null;
     let TR_AUTO_SELECT_QUERY = null;
+    let trConversationMessages = [];
+    const TR_SESSION_ID = 'tr_' + Math.random().toString(36).slice(2);
 
     async function findTranscripts() {
       const btn = document.getElementById('trFindBtn');
@@ -1349,7 +1348,8 @@
       document.getElementById('tr_meta').innerHTML = `<strong>${escapeHtml(TR_SELECTED.name)}</strong>`;
       document.getElementById('tr_preview').textContent = TR_SELECTED.preview || '(no preview)';
       document.getElementById('tr_qa').style.display = 'block';
-      document.getElementById('tr_ans_container').style.display = 'none';
+      trConversationMessages = [];
+      updateTrConversationUI();
       document.getElementById('tr_qa').scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -1357,14 +1357,48 @@
       document.getElementById('tr_q').value = prompt;
     }
 
-    function copyTrResponse() {
-      const el = document.getElementById('tr_ans');
-      const text = el ? el.innerText : '';
+    function copyTrResponse(idx) {
+      const msg = trConversationMessages[idx];
+      if (!msg) return;
+      const el = document.getElementById('tr-msg-' + idx);
+      const text = el ? el.innerText : msg.text;
       navigator.clipboard.writeText(text).then(() => {
         showToast('Copied to clipboard');
       }).catch(() => {
         showToast('Failed to copy', 'error');
       });
+    }
+
+    function updateTrConversationUI() {
+      const container = document.getElementById('trConversationHistory');
+      const status = document.getElementById('tr_convStatus');
+      
+      if (trConversationMessages.length === 0) {
+        container.innerHTML = `<div class="chat-empty"><div class="chat-empty-icon">💬</div><p>Start a conversation by asking a question about this transcript</p></div>`;
+        status.textContent = '';
+        return;
+      }
+      
+      status.textContent = `(${trConversationMessages.length} messages)`;
+      container.innerHTML = trConversationMessages.map((msg, idx) => `
+        <div class="chat-message ${msg.role}">
+          <div class="chat-header">
+            <span class="chat-role">${msg.role === 'user' ? 'You' : 'AI Assistant'}</span>
+            ${msg.role === 'assistant' ? `<button class="copy-btn" onclick="copyTrResponse(${idx})" title="Copy to clipboard">📋</button>` : ''}
+          </div>
+          <div class="chat-content" id="tr-msg-${idx}">${msg.role === 'user' ? escapeHtml(msg.text) : msg.text}</div>
+        </div>
+      `).join('');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    async function newTranscriptConversation() {
+      try { await apiCall({ action: 'clearTranscriptConversation', sessionId: TR_SESSION_ID }); } catch (e) {}
+      trConversationMessages = [];
+      updateTrConversationUI();
+      document.getElementById('tr_q').value = '';
+      document.getElementById('tr_err').textContent = '';
+      showToast('New transcript chat started');
     }
 
     async function askTranscript() {
@@ -1376,28 +1410,37 @@
       const thinking = document.getElementById('tr_thinking');
       btn.disabled = true;
       document.getElementById('tr_err').textContent = '';
-      document.getElementById('tr_ans_container').style.display = 'none';
       thinking.style.display = 'block';
+
+      trConversationMessages.push({ role: 'user', text: q });
+      updateTrConversationUI();
+      document.getElementById('tr_q').value = '';
 
       try {
         const data = await apiCall({
           action: 'askTranscript',
           id: TR_SELECTED.id,
           mimeType: TR_SELECTED.mimeType,
-          question: q
-        });
+          question: q,
+          sessionId: TR_SESSION_ID
+        }, 120000);
 
         if (!data?.ok) {
           document.getElementById('tr_err').textContent = data?.error || 'Failed.';
+          trConversationMessages.pop();
+          updateTrConversationUI();
         } else {
-          document.getElementById('tr_ans').innerHTML = data.answer || '';
-          document.getElementById('tr_ans_container').style.display = 'block';
+          trConversationMessages.push({ role: 'assistant', text: data.answer || '' });
+          updateTrConversationUI();
         }
       } catch (err) {
         document.getElementById('tr_err').textContent = err.message;
+        trConversationMessages.pop();
+        updateTrConversationUI();
       } finally {
         btn.disabled = false;
         thinking.style.display = 'none';
+        document.getElementById('tr_q').focus();
       }
     }
 

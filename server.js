@@ -582,13 +582,32 @@ async function findTranscriptsLocal(p) {
   return { ok: true, results: results.slice(0, limit) };
 }
 
-// Ask about transcript
+// Transcript conversation storage (keyed by session ID)
+const transcriptConversations = new Map();
+
+function getTranscriptConversation(sessionId) {
+  if (!transcriptConversations.has(sessionId)) {
+    transcriptConversations.set(sessionId, { history: [], transcriptId: null });
+  }
+  return transcriptConversations.get(sessionId);
+}
+
+function clearTranscriptConversation(sessionId) {
+  transcriptConversations.delete(sessionId);
+  return { cleared: true };
+}
+
+// Ask about transcript (with conversation history)
 async function askTranscript(p) {
   const id = String(p.id || "").trim();
   const q = String(p.question || "").trim();
+  const sessionId = String(p.sessionId || "tr_default").trim();
   
   if (!id) return { ok: false, error: "Missing transcript id" };
   if (!q) return { ok: false, error: "Missing question" };
+
+  const conversation = getTranscriptConversation(sessionId);
+  const isNewTranscript = conversation.transcriptId !== id;
 
   let raw;
   try {
@@ -608,34 +627,59 @@ async function askTranscript(p) {
   const truncatedText = text.length > MAX_TRANSCRIPT_CHARS ? 
     text.slice(text.length - MAX_TRANSCRIPT_CHARS) : text;
 
-  const prompt = [
-    "You answer questions about a meeting transcript.",
-    "",
-    "FORMATTING RULES (MUST FOLLOW):",
-    "- Return clean HTML only (no Markdown fences or code blocks)",
-    "- ALWAYS use bullet points (<ul><li>) for lists",
-    "- ALWAYS use <strong> tags to bold key names, dates, topics, and important terms",
-    "- Use <h4> for section headers when organizing multiple topics",
-    "- Keep paragraphs short and scannable",
-    "- Example format:",
-    "  <h4>Topic Name</h4>",
-    "  <ul>",
-    "    <li><strong>Person Name</strong> discussed <strong>Topic</strong></li>",
-    "  </ul>",
-    "",
-    "If not clearly in the transcript, say so briefly.",
-    "",
-    "CONTEXT: My name is Jeff Kern, Network Engagement Lead at Teach For All. I manage European region partners (Ukraine, Latvia, Slovakia, Italy, Spain, Portugal) and early-stage partners (Albania, Moldova).",
-    "",
-    "Question:", q,
-    "",
-    "Transcript:", '"""', truncatedText, '"""',
-    "",
-    "Remember: Use bullets and bold formatting. Make it easy to scan."
-  ].join("\n");
+  let prompt;
+  if (isNewTranscript || conversation.history.length === 0) {
+    // First message or different transcript - include full context
+    prompt = [
+      "You answer questions about a meeting transcript.",
+      "",
+      "FORMATTING RULES (MUST FOLLOW):",
+      "- Return clean HTML only (no Markdown fences or code blocks)",
+      "- ALWAYS use bullet points (<ul><li>) for lists",
+      "- ALWAYS use <strong> tags to bold key names, dates, topics, and important terms",
+      "- Use <h4> for section headers when organizing multiple topics",
+      "- Keep paragraphs short and scannable",
+      "- Example format:",
+      "  <h4>Topic Name</h4>",
+      "  <ul>",
+      "    <li><strong>Person Name</strong> discussed <strong>Topic</strong></li>",
+      "  </ul>",
+      "",
+      "If not clearly in the transcript, say so briefly.",
+      "",
+      "CONTEXT: My name is Jeff Kern, Network Engagement Lead at Teach For All. I manage European region partners (Ukraine, Latvia, Slovakia, Italy, Spain, Portugal) and early-stage partners (Albania, Moldova).",
+      "",
+      "Question:", q,
+      "",
+      "Transcript:", '"""', truncatedText, '"""',
+      "",
+      "Remember: Use bullets and bold formatting. Make it easy to scan."
+    ].join("\n");
 
-  const answer = await gemini(MODEL_SYNTH, prompt);
-  return { ok: true, answer: answer };
+    conversation.transcriptId = id;
+    conversation.history = [];
+  } else {
+    // Follow-up message - just the question
+    prompt = `Follow-up question about the same transcript:\n\n${q}\n\nRemember: Return clean HTML with bullets and bold formatting. Make it easy to scan.`;
+  }
+
+  const answer = await gemini(MODEL_SYNTH, prompt, conversation.history);
+
+  // Store in conversation history
+  conversation.history.push({ role: "user", text: prompt });
+  conversation.history.push({ role: "model", text: answer });
+
+  // Trim history if too long
+  if (conversation.history.length > MAX_CONVERSATION_HISTORY * 2) {
+    conversation.history = conversation.history.slice(-MAX_CONVERSATION_HISTORY * 2);
+  }
+
+  return { 
+    ok: true, 
+    answer,
+    conversationLength: conversation.history.length / 2,
+    isNewConversation: isNewTranscript || conversation.history.length === 2
+  };
 }
 
 // API Routes
@@ -673,6 +717,12 @@ app.get('/api', async (req, res) => {
       const sessionId = req.query.sessionId || "default";
       clearConversation(sessionId);
       return res.json({ ok: true, message: "Conversation cleared" });
+    }
+
+    if (action === "cleartranscriptconversation") {
+      const sessionId = req.query.sessionId || "tr_default";
+      clearTranscriptConversation(sessionId);
+      return res.json({ ok: true, message: "Transcript conversation cleared" });
     }
 
     if (action === "ask") {
